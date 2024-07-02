@@ -1,0 +1,8 @@
+.period-dot {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    background-color: #0084ff;
+    border-radius: 50%;
+    margin: 0 0 -1px 2px;
+}

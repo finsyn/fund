@@ -1,2 +1,6 @@
 .idea/
 pico-main/
+data/
+tmp/
+.DS_Store
+.env
