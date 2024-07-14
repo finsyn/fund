@@ -57,14 +57,14 @@ func main() {
 		}
 		slog.Info("stock quotes", "name", h.Name, "num", len(qStock))
 
-		x, y := returnPairs(qStock, qMarket)
+		x, y := returnPairs(qMarket, qStock)
 		slog.Info("return sample", "x", x[0], "y", y[0])
 		slog.Info("return pairs", "num_x", len(x), "num_y", len(y))
-		cov := stat.Covariance(x, y, nil)
-		beta := cov / stat.Variance(y, nil)
-		slog.Info("stats", "cov", cov, "beta", beta)
+		_, beta := stat.LinearRegression(x, y, nil, false)
+		slog.Info("stats", "beta", beta)
 		betaAndValues = append(betaAndValues, [2]float64{beta, h.Value})
 		sumValues += h.Value
+
 	}
 
 	var beta float64
