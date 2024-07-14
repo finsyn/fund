@@ -47,8 +47,7 @@ func main() {
 	fHoldings := read("data/holdings")
 	holdings := readHoldings(fHoldings, accountNumber)
 
-	var portfolioResults [][3]float64
-	var sumValues float64
+	var sekBeta, sekIVol, sekValue float64
 
 	for _, h := range holdings {
 		fStock := read(filepath.Join(dataDir, h.ISIN))
@@ -63,23 +62,19 @@ func main() {
 		slog.Info("created return pairs", "num_x", len(x), "num_y", len(y))
 		alpha, beta := stat.LinearRegression(x, y, nil, false)
 		slog.Info("calculated linear regression", "beta", beta)
-		sumValues += h.Value
+		sekValue += h.Value
 
 		n := float64(len(x))
 		res := residual(x, y, alpha, beta)
-		rse := math.Sqrt(res / (n - 2)) // should this be -2 or -1 for a one factor model?
-		ivol := 100 * rse * math.Sqrt(n)
-		slog.Info("calculated idiosyncratic volatility", "res", res, "rse", rse, "ivol", ivol)
+		rse := math.Sqrt(res / (n - 2)) // should this be -2 or -1 for a one-factor model?
+		iVol := rse * math.Sqrt(n)
+		slog.Info("calculated idiosyncratic volatility", "res", res, "rse", rse, "iVol", iVol)
 
-		portfolioResults = append(portfolioResults, [3]float64{beta, ivol, h.Value})
+		sekBeta += beta * h.Value
+		sekIVol += iVol * h.Value
 	}
 
-	var beta, ivol float64
-	for _, bv := range portfolioResults {
-		beta += bv[0] * bv[2] / sumValues
-		ivol += bv[1] * bv[2] / sumValues
-	}
-	slog.Info("calculated portfolio factors", "beta", beta, "ivol", ivol)
+	slog.Info("calculated portfolio factors", "sek_beta", sekBeta, "pct_beta", sekBeta/sekValue, "sek_ivol", sekIVol, "pct_ivol", sekIVol/sekValue)
 }
 
 func read(dirName string) io.Reader {
