@@ -47,7 +47,7 @@ func main() {
 	fHoldings := read("data/holdings")
 	holdings := readHoldings(fHoldings, accountNumber)
 
-	var betaAndValues [][2]float64
+	var portfolioResults [][3]float64
 	var sumValues float64
 
 	for _, h := range holdings {
@@ -63,21 +63,23 @@ func main() {
 		slog.Info("created return pairs", "num_x", len(x), "num_y", len(y))
 		alpha, beta := stat.LinearRegression(x, y, nil, false)
 		slog.Info("calculated linear regression", "beta", beta)
-		betaAndValues = append(betaAndValues, [2]float64{beta, h.Value})
 		sumValues += h.Value
 
 		n := float64(len(x))
 		res := residual(x, y, alpha, beta)
 		rse := math.Sqrt(res / (n - 2)) // should this be -2 or -1 for a one factor model?
-		idioVol := 100 * rse * math.Sqrt(n)
-		slog.Info("calculated idiosyncratic volatility", "res", res, "rse", rse, "idioVol", idioVol)
+		ivol := 100 * rse * math.Sqrt(n)
+		slog.Info("calculated idiosyncratic volatility", "res", res, "rse", rse, "ivol", ivol)
+
+		portfolioResults = append(portfolioResults, [3]float64{beta, ivol, h.Value})
 	}
 
-	var beta float64
-	for _, bv := range betaAndValues {
-		beta += bv[0] * bv[1] / sumValues
+	var beta, ivol float64
+	for _, bv := range portfolioResults {
+		beta += bv[0] * bv[2] / sumValues
+		ivol += bv[1] * bv[2] / sumValues
 	}
-	slog.Info("calculated portfolio weighted beta", "beta", beta)
+	slog.Info("calculated portfolio factors", "beta", beta, "ivol", ivol)
 }
 
 func read(dirName string) io.Reader {
