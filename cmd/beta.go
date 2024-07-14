@@ -2,13 +2,15 @@ package main
 
 import (
 	"encoding/csv"
+	"fmt"
+	"github.com/finsyn/fund/pkg/financial"
 	"gonum.org/v1/gonum/stat"
 	"io"
 	"log"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -17,41 +19,128 @@ type Quote struct {
 	Close float64
 }
 
+type Holding struct {
+	ISIN  string
+	Name  string
+	Value float64
+}
+
+const dataDir = "data"
+
 func main() {
 	handler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelInfo})
 	slog.SetDefault(slog.New(handler))
 
-	qStock := readQuotes("data/GENO-2023-07-13-2024-07-13.csv", "Date", "Closing price")
-	qMarket := readQuotes("data/_SE0003045640_2024-07-13.csv", "Date", "Closingprice")
-	slog.Info("stock quotes", "num", len(qStock))
-	slog.Info("market quotes", "num", len(qStock))
-	x, y := returnPairs(qStock, qMarket)
-	slog.Info("return sample", "x", x[0], "y", y[0])
-	slog.Info("return pairs", "num_x", len(x), "num_y", len(y))
-	cov := stat.Covariance(x, y, nil)
-	slog.Info("stats", "cov", cov, "beta", cov/stat.Variance(y, nil))
+	accountNumber := os.Getenv("ACCOUNT_NUMBER")
+	if accountNumber == "" {
+		log.Fatal("ACCOUNT_NUMBER must be set")
+	}
+
+	fMarket := read(filepath.Join(dataDir, "omx-allshares"))
+	qMarket, err := parseQuotes(fMarket, "Date", "Closingprice", true)
+	if err != nil {
+		log.Fatal("failed parsing market quotes", err)
+	}
+	slog.Info("market quotes", "num", len(qMarket))
+
+	fHoldings := read("data/holdings")
+	holdings := readHoldings(fHoldings, accountNumber)
+
+	var betaAndValues [][2]float64
+	var sumValues float64
+
+	for _, h := range holdings {
+		fStock := read(filepath.Join(dataDir, h.ISIN))
+		qStock, err := parseQuotes(fStock, "Date", "Closing price", false)
+		if err != nil {
+			log.Fatal("failed parsing quotes", err)
+		}
+		slog.Info("stock quotes", "name", h.Name, "num", len(qStock))
+
+		x, y := returnPairs(qStock, qMarket)
+		slog.Info("return sample", "x", x[0], "y", y[0])
+		slog.Info("return pairs", "num_x", len(x), "num_y", len(y))
+		cov := stat.Covariance(x, y, nil)
+		beta := cov / stat.Variance(y, nil)
+		slog.Info("stats", "cov", cov, "beta", beta)
+		betaAndValues = append(betaAndValues, [2]float64{beta, h.Value})
+		sumValues += h.Value
+	}
+
+	var beta float64
+	for _, bv := range betaAndValues {
+		beta += bv[0] * bv[1] / sumValues
+	}
+	slog.Info("portfolio weighted beta", "beta", beta)
 }
 
-func readQuotes(path, dateCol, priceCol string) []Quote {
-	f, err := os.Open(path)
+func read(dirName string) io.Reader {
+	files, err := os.ReadDir(dirName)
 	if err != nil {
-		log.Fatal("Unable to read input file ", path, err)
+		log.Fatal("Unable to read input file "+dirName, err)
 	}
-	defer f.Close()
+	for _, f := range files {
+		if !f.IsDir() {
+			fr, err := os.Open(filepath.Join(dirName, f.Name()))
+			if err != nil {
+				log.Fatal("Unable to read input file "+f.Name(), err)
+			}
+			return fr
+		}
+	}
+	log.Fatal("no files found in ", dirName)
+	return nil
+}
 
+// readHoldings reads a file from avanza with your holdings in a specific account
+func readHoldings(f io.Reader, accountNumber string) []Holding {
+	r := csv.NewReader(f)
+	r.Comma = ';'
+
+	// skip separator meta row
+	if _, err := r.Read(); err != nil {
+		log.Fatal("Unable to read header row ", err)
+	}
+
+	var holdings []Holding
+	for {
+		record, err := r.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatal("failed reading data row ", err)
+		}
+		an := record[0]
+		if an != accountNumber {
+			continue
+		}
+		v, err := strconv.ParseFloat(record[3], 64)
+		if err != nil {
+			log.Fatal("failed parsing value ", err)
+		}
+		holdings = append(holdings, Holding{
+			Name:  record[1],
+			Value: v,
+			ISIN:  record[5],
+		})
+	}
+	return holdings
+}
+
+func parseQuotes(f io.Reader, dateCol, priceCol string, isUS bool) ([]Quote, error) {
 	r := csv.NewReader(f)
 	r.Comma = ';'
 
 	// skip separator meta row
 	r.FieldsPerRecord = -1
 	if _, err := r.Read(); err != nil {
-		log.Fatal("Unable to read separator row ", err)
+		return nil, fmt.Errorf("unable to read separator row %w", err)
 	}
-	// skip separator meta row
-	//r.FieldsPerRecord = 12
+	//skip separator meta row
 	h, err := r.Read()
 	if err != nil {
-		log.Fatal("Unable to read header row ", err)
+		return nil, fmt.Errorf("unable to read header row %w", err)
 	}
 	// find column indexes
 	dateIndex := -1
@@ -65,10 +154,10 @@ func readQuotes(path, dateCol, priceCol string) []Quote {
 		}
 	}
 	if dateIndex == -1 {
-		log.Fatal("Unable to find column ", dateCol)
+		return nil, fmt.Errorf("unable to find column %s", dateCol)
 	}
 	if priceIndex == -1 {
-		log.Fatal("Unable to find column ", priceCol)
+		return nil, fmt.Errorf("unable to find column %s", priceCol)
 	}
 
 	var quotes []Quote
@@ -78,15 +167,15 @@ func readQuotes(path, dateCol, priceCol string) []Quote {
 			break
 		}
 		if err != nil {
-			log.Fatal("failed reading data row ", err)
+			return nil, fmt.Errorf("failed reading data row %w", err)
 		}
 		d, err := time.Parse("2006-01-02", record[dateIndex])
 		if err != nil {
-			log.Fatal("failed parsing date ", err)
+			return nil, fmt.Errorf("failed parsing date %w", err)
 		}
-		p, err := strconv.ParseFloat(strings.ReplaceAll(record[priceIndex], ",", "."), 64)
+		p, err := financial.ParseNumber(record[priceIndex], isUS)
 		if err != nil {
-			slog.Warn("failed parsing price", "value", p)
+			slog.Warn("failed parsing price", "value", record[priceIndex])
 			continue
 		}
 		quotes = append(quotes, Quote{
@@ -94,7 +183,7 @@ func readQuotes(path, dateCol, priceCol string) []Quote {
 			Close: p,
 		})
 	}
-	return quotes
+	return quotes, nil
 }
 
 func returnPairs(a, b []Quote) ([]float64, []float64) {
