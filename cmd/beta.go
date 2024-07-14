@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"log/slog"
+	"math"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -55,23 +56,28 @@ func main() {
 		if err != nil {
 			log.Fatal("failed parsing quotes", err)
 		}
-		slog.Info("stock quotes", "name", h.Name, "num", len(qStock))
+		slog.Info("parsed stock quotes", "name", h.Name, "num", len(qStock))
 
 		x, y := returnPairs(qMarket, qStock)
-		slog.Info("return sample", "x", x[0], "y", y[0])
-		slog.Info("return pairs", "num_x", len(x), "num_y", len(y))
-		_, beta := stat.LinearRegression(x, y, nil, false)
-		slog.Info("stats", "beta", beta)
+		slog.Info("created return sample", "x", x[0], "y", y[0])
+		slog.Info("created return pairs", "num_x", len(x), "num_y", len(y))
+		alpha, beta := stat.LinearRegression(x, y, nil, false)
+		slog.Info("calculated linear regression", "beta", beta)
 		betaAndValues = append(betaAndValues, [2]float64{beta, h.Value})
 		sumValues += h.Value
 
+		n := float64(len(x))
+		res := residual(x, y, alpha, beta)
+		rse := math.Sqrt(res / (n - 2)) // should this be -2 or -1 for a one factor model?
+		idioVol := 100 * rse * math.Sqrt(n)
+		slog.Info("calculated idiosyncratic volatility", "res", res, "rse", rse, "idioVol", idioVol)
 	}
 
 	var beta float64
 	for _, bv := range betaAndValues {
 		beta += bv[0] * bv[1] / sumValues
 	}
-	slog.Info("portfolio weighted beta", "beta", beta)
+	slog.Info("calculated portfolio weighted beta", "beta", beta)
 }
 
 func read(dirName string) io.Reader {
@@ -220,4 +226,13 @@ func returnPairs(a, b []Quote) ([]float64, []float64) {
 		d = d.AddDate(0, 0, -1)
 	}
 	return x, y
+}
+
+func residual(x, y []float64, alpha, beta float64) float64 {
+	var res float64
+	for i, sample := range y {
+		r := sample - (alpha + beta*x[i])
+		res += math.Pow(r, 2)
+	}
+	return res
 }
