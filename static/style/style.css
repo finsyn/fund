@@ -14,3 +14,7 @@
 .text--bold {
     color: var(--pico-primary);
 }
+
+article > img {
+    width: 100%
+}
