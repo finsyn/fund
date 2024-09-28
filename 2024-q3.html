@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Finsyns lilla sverigefond - Andra kvartalet</title>
+    <link rel="stylesheet" href="static/style/pico.min.css">
+    <link rel="stylesheet" href="static/style/style.css">
+</head>
+<body>
+<main>
+    <header class="container">
+        <nav>
+            <ul>
+                <li>
+                    <a href="/">
+                        <h3>
+                            <span class="text--bold">Finsyns Lilla</span> Sverigefond
+                        </h3>
+                    </a>
+                </li>
+            </ul>
+            <ul></ul>
+            <ul></ul>
+        </nav>
+        <h2>Andra kvartalet</h2>
+        <p>
+            Under fondens andra kvartal låg fokus på fortbildning och systematisering.
+            Fondens förvaltare började läsa Paleologos bok Advanced Portfolio Management och tillämpade allt eftersom ideerna som presenteras där.
+        </p>
+    </header>
+    <section class="container">
+        <h3>Beta</h3>
+        <p>
+            Beta är en viktig del av förklaringen av en akties förväntade avkastning i den klassiska Capital Asset Pricing Model.
+            För att förstå fondens exponering mot marknaden har därför beta samt idiosynkratisk, eller bolagsspecifik, volatilitet beräknats för alla innehav.
+            Beräkningarna görs nu periodiskt med ett eget litet program skrivet i Go.
+            Aktiekursdata hämtas från EODHD:s API och data om fondens innehav från Avanza.
+            Marknaden får i beräkningarna representeras av indexet OMX Stockholm All-Shares.
+            Fondens målsättning framöver är att på portföljnivå ha ett beta en bit under ett för att minska beroendet av marknaden i stort.
+        </p>
+    </section>
+    <section class="container">
+        <h3>Diversifiering</h3>
+        <p>
+            Förutom att minska sitt beroende av marknaden önskar fonden även hålla den icke-marknads-beroende volatiliteten på portföljnivå nere.
+            Därför kommer fonden framöver alltid bestå av minst tio innehav.
+            Dessutom gör fonden antagandet av beroendet mellan bolag inom olika sektorer är mindre än mellan bolag inom samma sektor.
+            Därför ska innehaven framöver hämtas från flera olika sektorer.
+        </p>
+        <p>
+            Givet fondens nuvarande investeringsmandat finns det drygt 300 investeringsbara bolag i 10 olika sektorer.
+            Vissa sektorer innehåller mycket fler bolag än andra.
+            Fonden har vid kvartalets utgång varje sektor representerad förutom energi eftersom den sektorn endast innehåller ett bolag.
+            Innehav med varierande börsvärde har inkluderats för att även få en spridning i storlek.
+        </p>
+        <article>
+            <img src="sector.png"/>
+        </article>
+        <p>
+            Förutom att nu inneha bolag i flera olika sektorer har fonden även balanserats om för att inneha bolag av olika storlekar.
+            Bolag med alltför höga multiplar undviks generellt och resultatet av detta kan ses i grafen nedan där innehaven tillsammans med de övriga bolagen i fondens investeringsuniversum.
+            Storleken på punkterna i grafen beskriver bolagens börsvärde.
+            Börsvärden och nyckeltal är hämtade från Börsdata.
+        </p>
+        <article>
+            <img src="innehaven.png"/>
+        </article>
+    </section>
+    <section class="container">
+        <h3>Belåning</h3>
+        <p>
+            Fonden har tagit in de lite större bolagen SSAB, Catena och Thule i portföljen för att kvalificera för Avanzas Ränterabatt.
+            Fonden är därmed redo att vid väl valda tillfällen ha en mindre hävstång på portföljen.
+            Planen är att hålla sig inom den lägsta belåningsgraden och därmed ha en ränta på under två procent.
+            Som beslutsstöd för att avgöra hur mycket hävstång som ska användas används Schillers cykliskt justerade P/E ratio.
+            Värdet ger en fingervisning om hur över- eller undervärderad en marknad är.
+            En lägre ratio kan motivera fonden att öka sin belåning.
+            Förutom ration bör även hänsyn tas till den aktuella styrräntan eftersom en låg styrränta kan motivera en generellt lite högre ratio.
+            För att få en bild av hur ration är för den svenska marknaden har er förvaltare sammanställt data från Barclays och Riksbanken.
+            Den sammanställda grafen kan ses nedan.
+            Givet grafen nedan drar fonden slutsatsen att en smärre belåning kan vara motiverad just nu, speciellt antaget Riksbankens kommande utannonserade räntesänkningar.
+        </p>
+        <article>
+            <img src="cape.png"/>
+        </article>
+    </section>
+    <section class="container">
+        <h3>Innehaven</h3>
+        <p>
+            Fonden gick inledningsvis bra i förhållande till antagonisten Carnegie Sverigefond men tappade framåt slutet av kvartalet när innehavet Guideline Geo kraschade.
+            Bolaget är fondens erkänt svajigaste kort med sitt börsvärde på ynka 100 MSEK.
+            Det låga börsvärdet är kanske förklaringen till dess låga likviditet och höga volatilitet.
+            Trots det behåller fonden sin position till följd av att fortsatta insiderköp sker i bolaget på de nuvarande nivåerna.
+            Givet den nuvarande värderingen bör det finnas mer uppsida än nedsida i bolaget då de till synes tillverkar och säljer användbara produkter runt om i världen.
+        </p>
+        <p>
+            I andra änden av värderingsspektrat har fonden tagit in jätten SSAB med sin värdering på 50 MDSEK.
+            En kurs slaktad av konjunkturcykeln och indirekt kinesisk konkurrens i fordonssektorn (?) har gett en värdering som nu känns trygg för fonden att gå in på.
+            I det här läget bör till slut positiva nyheter komma, antingen i form av starkare världskonjunktur eller protektionistiska åtgärder riktade mot kinesiska bilproducenter.
+            Blankningar i bolaget kan ha nått en peak under sommaren och flera insynsköp har skett på nuvarande kursnivåer.
+       </p>
+       <p>
+            I mellanviktklassen har fonden en större position i bredbandsleverantören Bahnhof.
+            Det låga betat och motståndskraften vid kriser gör telekombranchen attraktiv för fonden.
+            Vid till exempel skräcken på börsen efter den elfte september klarade sig telekom generellt bra.
+            Samtidigt har fondens förvaltare sett exempel på hemmaplan av bolagets säljarbete när bostadsrättsföreningen upphandlade bredband.
+            Bahnhof gav då ett mycket konkurrenskraftigt erbjudande med lång bindningstid.
+            Fonden tror att bolaget fortfarande har mycket kvar att hämta när det med sin nuvarande värdering på drygt 5 MDSEK tar marknadsandelar från jättar som Telia med sin värdering på över 100 MDSEK.
+            Dyrtiderna gör att kunder bör ser över sina avtal och en duktig snabbrörlig leverantör bör ha en bra position här.
+       </p>
+       <p>
+            Till slut köpte fondens förvaltare en Thule Urban Glide 2.
+            Och efter att ha testkört vagnen togs Thule även in som ett innehav i fonden.
+            Sänkta räntor och regeringens nya budget med skattesänkningar för höginkomsttagare gör att fonden ser positivt på bolagets möjligheter framöver.
+        </p>
+        <article>
+            <table class="striped" hx-trigger="change" hx-post="/estimates" hx-include="this" hx-target="main"><thead><tr><th>Innehav</th><th>Beta</th><th>Idiosynkratisk volatilitet (%)</th><th>Andel (%)</th></tr></thead> <tbody><tr><td><a href="https://news.finsyn.se/lei/529900329VS14ZIML164">SSAB B</a></td><td>0.94</td><td>27</td><td>15</td></tr><tr><td><a href="https://news.finsyn.se/lei/213800K7LQU3H85KCU96">Bahnhof B</a></td><td>0.32</td><td>28</td><td>11</td></tr><tr><td><a href="https://news.finsyn.se/lei/549300OOMD33M4KT6E49">Guideline Geo</a></td><td>0.21</td><td>68</td><td>11</td></tr><tr><td><a href="https://news.finsyn.se/lei/549300FOT7EE85QYB655">Arise</a></td><td>0.74</td><td>44</td><td>10</td></tr><tr><td><a href="https://news.finsyn.se/lei/529900EBHTYGLA6PGP77">Alleima</a></td><td>1.08</td><td>31</td><td>10</td></tr><tr><td><a href="https://news.finsyn.se/lei/5493006VHH78UQJVF844">Scandi Standard</a></td><td>0.38</td><td>24</td><td>10</td></tr><tr><td><a href="https://news.finsyn.se/lei/549300XHHOGBOERKU333">Thule Group</a></td><td>1.30</td><td>27</td><td>9</td></tr><tr><td><a href="https://news.finsyn.se/lei/549300HMPIC1B86ZHC96">Proact IT Group</a></td><td>0.86</td><td>26</td><td>8</td></tr><tr><td><a href="https://news.finsyn.se/lei/549300C0DH9EESDQUA52">Arcoma</a></td><td>0.41</td><td>45</td><td>8</td></tr><tr><td><a href="https://news.finsyn.se/lei/549300EMLM7AH5LDLY65">Catena</a></td><td>1.16</td><td>24</td><td>8</td></tr></tbody></table>
+        </article>
+
+        <h3>Resultat</h3>
+        <p>
+            <span class="period-dot"></span>
+        </p>
+    </section>
+    <section class="container">
+        <hr>
+        <div class="grid">
+            <p><b>Antal innehav</b></p>
+            <p>10</p>
+        </div>
+        <div class="grid">
+            <p><b>Ingående kapital</b></p>
+            <p>104 500 SEK</p>
+        </div>
+        <div class="grid">
+            <p><b>Utgående kapital</b></p>
+            <p>107 500 SEK</p>
+        </div>
+        <div class="grid">
+            <p><b>Utveckling under kvartalet</b></p>
+            <p>+4.5 %</p>
+        </div>
+        <hr>
+        <div class="grid">
+            <small>Uppdaterat 2024-09-31</small>
+        </div>
+    </section>
+</main>
+</body>
+</html>
+
+
+
+

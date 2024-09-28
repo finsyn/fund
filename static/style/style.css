@@ -6,3 +6,11 @@
     border-radius: 50%;
     margin: 0 0 -1px 2px;
 }
+
+:root:not([data-theme=dark]), [data-theme=light] {
+    --pico-primary: #24a1dd;
+}
+
+.text--bold {
+    color: var(--pico-primary);
+}
